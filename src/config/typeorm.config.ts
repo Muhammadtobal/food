@@ -1,18 +1,22 @@
 import { config } from 'dotenv';
+import { Category } from 'src/category/entities/category.entity';
+import { Item } from 'src/item/entities/item.entity';
 import { DataSource } from 'typeorm';
 config();
 
 const isCompiled = __dirname.includes('dist');
-export const AppDataSource = new DataSource({
+ const AppDataSource = new DataSource({
   type: 'mysql',
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT) || 3306,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  entities: [],
+  entities: [Item,Category],
   migrations: [isCompiled ? 'dist/migrations/*.js' : 'src/migrations/*.ts'],
 
   synchronize: false,
   logging: false,
 });
+
+export default AppDataSource; 
