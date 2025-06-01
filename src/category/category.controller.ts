@@ -13,11 +13,7 @@ export class CategoryController {
   @Post()
   @UseInterceptors(FileInterceptor('image', uploadImage('categories', 'category')))
  async create(@Body() createCategoryDto: CreateCategoryDto,@UploadedFile() file: Express.Multer.File) {
-  const imageUrl = file
-      ? `${process.env.APP_URL || 'http://localhost:3000'}/uploads/categories/${file.filename}`
-      : null;
-
-    const data =await this.categoryService.create(createCategoryDto,imageUrl);
+    const data =await this.categoryService.create(createCategoryDto, file?.filename);
     return{
       message:"Category created successfully",
       success:true,

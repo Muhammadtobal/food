@@ -14,12 +14,15 @@ export class ItemController {
     @UseInterceptors(FileInterceptor('image', uploadImage('items', 'item')))
   
   async create(@Body() createItemDto: CreateItemDto,@UploadedFile() file: Express.Multer.File) {
-    const data=await  this.itemService.create(createItemDto,file?.filename);
-    return{
-      message:"Item created successfully",
-      success:true,
-      data:data
-    }
+   
+
+  const data=await  this.itemService.create(createItemDto,file?.filename);
+  return{
+    message:"Item created successfully",
+    success:true,
+    data:data
+  }
+
   }
 
   @Get()

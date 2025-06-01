@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +17,9 @@ export class ItemService {
 
   ){}
   async create(createItemDto: CreateItemDto,imageFile:string) {
+    if(imageFile === null){
+      throw new BadRequestException("image null")
+    }
     const result= await this.itemRepository.create({
       ...createItemDto,
       image:imageFile
@@ -44,7 +47,18 @@ export class ItemService {
          sort,
        );
    
-       return { data, pagination };
+       
+    const host = process.env.APP_URL || 'http://localhost';
+    const port = process.env.PORT || 3000;
+  
+    const updatedData = data.map(item => ({
+      ...item,
+      image: item.image
+        ? `${host}:${port}/uploads/items/${item.image}`
+        : null,
+    }));
+  
+    return { data: updatedData, pagination };
   }
 
  async findOne(id: number) {
@@ -56,6 +70,11 @@ export class ItemService {
         throw new NotFoundException(`Item not found with ID: ${id}`);
       }
   
+      const host = process.env.APP_URL || 'http://localhost';
+      const port = process.env.PORT || 3000;
+      if (item.image) {
+        item.image = `${host}:${port}/uploads/items/${item.image}`;
+      }
       return item;
   }
 

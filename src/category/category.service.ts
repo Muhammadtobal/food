@@ -15,10 +15,10 @@ export class CategoryService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
-  async create(createCategoryDto: CreateCategoryDto, imageFile: string | null) {
+  async create(createCategoryDto: CreateCategoryDto, imageFile: string ) {
     const newCategory =  this.categoryRepository.create({
       ...createCategoryDto,
-      image: imageFile ?? undefined ,
+      image: imageFile,
     });
     return await this.categoryRepository.save(newCategory);
   }
@@ -42,8 +42,18 @@ export class CategoryService {
       filters,
       sort,
     );
-
-    return { data, pagination };
+   
+    const host = process.env.APP_URL || 'http://localhost';
+    const port = process.env.PORT || 3000;
+  
+    const updatedData = data.map(category => ({
+      ...category,
+      image: category.image
+        ? `${host}:${port}/uploads/categories/${category.image}`
+        : null,
+    }));
+  
+    return { data: updatedData, pagination };
   }
 
   async findOne(id: number) {
@@ -54,7 +64,11 @@ export class CategoryService {
     if (!category) {
       throw new NotFoundException(`Category not found with ID: ${id}`);
     }
-
+    const host = process.env.APP_URL || 'http://localhost';
+    const port = process.env.PORT || 3000;
+    if (category.image) {
+      category.image = `${host}:${port}/uploads/categories/${category.image}`;
+    }
     return category;
   }
 
@@ -99,12 +113,17 @@ export class CategoryService {
     }
 
     if (category.image) {
-      const imagePath = join(__dirname, '..', '..', 'uploads', 'categories', category.image);
-
+      
       try {
+        const filename = category.image.split('/').pop(); 
+        if (!filename) {
+          throw new Error('Invalid image path');
+        }
+      const imagePath = join(__dirname, '..', '..', 'uploads', 'categories', filename);
+
         await unlink(imagePath);
       } catch (error) {
-        console.warn(`Failed to delete image: ${imagePath}`, error);
+        console.warn(`Failed to delete image: ${error.message}`);
       }
     }
 
