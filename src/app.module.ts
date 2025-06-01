@@ -6,13 +6,14 @@ import { OrderModule } from './order/order.module';
 import { CategoryModule } from './category/category.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DeliveryInformationModule } from './delivery-information/delivery-information.module';
 import  AppDataSource from './config/typeorm.config';
 
 @Module({
   imports: [
      ConfigModule.forRoot({isGlobal:true}),
      TypeOrmModule.forRoot(AppDataSource.options),
-    ItemModule, OrderModule, CategoryModule],
+    ItemModule, OrderModule, CategoryModule, DeliveryInformationModule],
   controllers: [AppController],
   providers: [AppService],
 })
