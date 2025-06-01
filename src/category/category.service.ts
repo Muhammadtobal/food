@@ -15,10 +15,10 @@ export class CategoryService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
-  async create(createCategoryDto: CreateCategoryDto, imageFile: string) {
-    const newCategory = await this.categoryRepository.create({
+  async create(createCategoryDto: CreateCategoryDto, imageFile: string | null) {
+    const newCategory =  this.categoryRepository.create({
       ...createCategoryDto,
-      image: imageFile,
+      image: imageFile ?? undefined ,
     });
     return await this.categoryRepository.save(newCategory);
   }
@@ -70,16 +70,17 @@ export class CategoryService {
 
     if (imageFilename) {
       const oldImage = category.image;
-      const imagePath = join(__dirname, '..', '..', 'uploads', 'categories', oldImage);
-
-      if (oldImage) {
+  
+      if (oldImage) {  
+        const imagePath = join(__dirname, '..', '..', 'uploads', 'categories', oldImage);
+  
         try {
           await unlink(imagePath);
         } catch (err) {
           console.warn(`Failed to delete old image: ${imagePath}`, err);
         }
       }
-
+  
       updateCategoryDto.image = imageFilename;
     }else{
       updateCategoryDto.image = category.image;

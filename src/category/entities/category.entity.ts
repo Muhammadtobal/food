@@ -9,8 +9,8 @@ id:number;
 @Column({nullable:false})
 name:string;
 
-@Column()
-image:string
+@Column({nullable:true})
+image:string 
 
 @OneToMany(()=>Item,(item)=>item.category)
 items:Item

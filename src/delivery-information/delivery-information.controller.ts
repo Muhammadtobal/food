@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   Query,
+  Put,
 } from '@nestjs/common';
 import { DeliveryInformationService } from './delivery-information.service';
 import { CreateDeliveryInformationDto } from './dto/create-delivery-information.dto';
 import { UpdateDeliveryInformationDto } from './dto/update-delivery-information.dto';
 import { PaginationQueryDto } from 'src/utils/paginateDto';
+import { retry } from 'rxjs';
 
 @Controller('delivery-information')
 export class DeliveryInformationController {
@@ -49,23 +51,36 @@ export class DeliveryInformationController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.deliveryInformationService.findOne(+id);
+  async findOne(@Param('id') id: number) {
+  const result = await this.deliveryInformationService.findOne(id)
+  return {
+    success: true,
+    message: 'delivery-information fetched successfully',
+    data:result,
+
+  };
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Put(':id')
+ async update(
+    @Param('id') id: number,
     @Body() updateDeliveryInformationDto: UpdateDeliveryInformationDto,
   ) {
-    return this.deliveryInformationService.update(
-      +id,
-      updateDeliveryInformationDto,
-    );
+ const result = await this.deliveryInformationService.update(id,updateDeliveryInformationDto)
+   return {
+    success: true,
+    message: 'delivery-information updated successfully',
+    data:result,
+   }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.deliveryInformationService.remove(+id);
+  async remove(@Param('id') id: number) {
+    await this.deliveryInformationService.remove(id)
+    return {
+      success: true,
+      message: 'Delivery-Information deleted successfully',
+    };
+  
   }
 }
