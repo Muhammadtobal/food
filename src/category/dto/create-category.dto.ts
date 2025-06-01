@@ -6,5 +6,5 @@ export class CreateCategoryDto {
   name: string;
   @IsOptional()
   @IsString()
-  image?: string;
+  image?: string | null;
 }
