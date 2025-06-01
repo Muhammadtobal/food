@@ -1,26 +1,112 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Category } from './entities/category.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PaginationQueryDto } from 'src/utils/paginateDto';
+import { paginate } from 'src/utils/paginate';
+import { join } from 'path';
+import { unlink } from 'fs/promises';
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
+  ) {}
+  async create(createCategoryDto: CreateCategoryDto, imageFile: string) {
+    const newCategory = await this.categoryRepository.create({
+      ...createCategoryDto,
+      image: imageFile,
+    });
+    return await this.categoryRepository.save(newCategory);
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async findAll(paginationQueryDto: PaginationQueryDto, filters: any) {
+    let { page, limit, allData, sortBy, order } = paginationQueryDto;
+    page = Number(page) || 1;
+    limit = Number(limit) || 10;
+    const sortField = sortBy || 'id';
+
+    const sort: Record<string, 'ASC' | 'DESC'> = {
+      [sortField]: order === 'asc' ? 'ASC' : 'DESC',
+    };
+
+    const { data, pagination } = await paginate<Category>(
+      this.categoryRepository,
+      ['items'],
+      page,
+      limit,
+      allData,
+      filters,
+      sort,
+    );
+
+    return { data, pagination };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: number) {
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category not found with ID: ${id}`);
+    }
+
+    return category;
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  
+  async update(id: number, updateCategoryDto: UpdateCategoryDto , imageFilename?: string): Promise<Category> {
+    const category = await this.categoryRepository.findOne({ where: { id } });
+
+    if (!category) {
+      throw new NotFoundException(`Category not found with ID: ${id}`);
+    }
+    
+
+
+    if (imageFilename) {
+      const oldImage = category.image;
+      const imagePath = join(__dirname, '..', '..', 'uploads', 'categories', oldImage);
+
+      if (oldImage) {
+        try {
+          await unlink(imagePath);
+        } catch (err) {
+          console.warn(`Failed to delete old image: ${imagePath}`, err);
+        }
+      }
+
+      updateCategoryDto.image = imageFilename;
+    }else{
+      updateCategoryDto.image = category.image;
+    }
+
+    const updatedCategory = Object.assign(category, updateCategoryDto);
+    return await this.categoryRepository.save(updatedCategory);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+
+  async remove(id: number): Promise<void> {
+    const category = await this.categoryRepository.findOneBy({ id });
+
+    if (!category) {
+      throw new NotFoundException(`Category not found with ID: ${id}`);
+    }
+
+    if (category.image) {
+      const imagePath = join(__dirname, '..', '..', 'uploads', 'categories', category.image);
+
+      try {
+        await unlink(imagePath);
+      } catch (error) {
+        console.warn(`Failed to delete image: ${imagePath}`, error);
+      }
+    }
+
+    await this.categoryRepository.delete(id);
   }
 }
