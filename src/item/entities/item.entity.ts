@@ -22,9 +22,6 @@ export class Item {
     onDelete: 'SET NULL',
   })
   category: Category;
-  @Column({ nullable: true })
-  categoryId: number;
-
   @CreateDateColumn()
   createdAt: Date;
 
