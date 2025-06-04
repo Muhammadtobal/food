@@ -9,7 +9,9 @@ export class CreateItemDto {
   @IsOptional()
   @IsString()
   image?: string;
-
+  @IsOptional()
+  @IsNumber()
+  price?: string;
   @IsOptional()
   @IsNumber()
   categoryId?: number; 

@@ -1,9 +1,12 @@
+import { CartItem } from 'src/cart-item/entities/cart-item.entity';
+import { Cart } from 'src/cart/entities/cart.entity';
 import { Category } from 'src/category/entities/category.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -17,13 +20,17 @@ export class Item {
 
   @Column()
   image: string;
-
+  @Column()
+  price: string;
   @ManyToOne(() => Category, (category) => category.items, {
     onDelete: 'SET NULL',
   })
   category: Category;
-  @Column({ nullable: true })
-  categoryId: number;
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.item, {
+    onDelete: 'SET NULL',
+  })
+  cartItems: CartItem;
 
   @CreateDateColumn()
   createdAt: Date;
