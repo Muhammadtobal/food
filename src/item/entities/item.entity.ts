@@ -1,5 +1,4 @@
 import { CartItem } from 'src/cart-item/entities/cart-item.entity';
-import { Cart } from 'src/cart/entities/cart.entity';
 import { Category } from 'src/category/entities/category.entity';
 import {
   Column,
@@ -31,6 +30,9 @@ export class Item {
     onDelete: 'SET NULL',
   })
   cartItems: CartItem;
+
+  @Column({ nullable: true })
+  description: string;
 
   @CreateDateColumn()
   createdAt: Date;
