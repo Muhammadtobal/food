@@ -1,10 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -17,17 +16,17 @@ async function bootstrap() {
   // if (!existsSync(uploadDir)) {
   //   mkdirSync(uploadDir);
   // }
-// app.useGlobalPipes(
-//   new ValidationPipe({
-//     whitelist: true,            
-//     forbidNonWhitelisted: true,  
-//     transform: true,             
-//   }),
-// )
-app.enableCors({
-  origin: 'http://localhost:5173',
-  credentials: true, 
-});
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     forbidNonWhitelisted: true,
+  //     transform: true,
+  //   }),
+  // )
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    credentials: true,
+  });
   app.setGlobalPrefix('api/v1');
   const config = new DocumentBuilder()
     .setTitle('My API')
