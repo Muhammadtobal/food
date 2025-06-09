@@ -1,8 +1,16 @@
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './local-auth.guard';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -27,6 +35,16 @@ export class AuthController {
       success: true,
       message: 'success',
       data: result,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async getProfile(@Request() req) {
+    return {
+      success: true,
+      message: 'User profile fetched successfully',
+      data: req.user,
     };
   }
 }
