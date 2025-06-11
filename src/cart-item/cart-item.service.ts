@@ -38,25 +38,42 @@ export class CartItemService {
         `Cart with ID ${createCartItemDto.cartId} not found`,
       );
     }
-
+    
     const item = await this.itemRepository.findOne({
       where: { id: createCartItemDto.itemId },
     });
+  
+ 
     if (!item) {
       throw new NotFoundException(
         `Item with ID ${createCartItemDto.itemId} not found`,
       );
     }
+    const existingCartItem = await this.cartItemRepository.findOne({
+      where: {
+        cart: { id: cart.id },
+        item: { id: createCartItemDto.itemId },
+      },
+    });
+  
+   
+    if (existingCartItem) {
+      existingCartItem.quantity += createCartItemDto.quantity;
+      existingCartItem.subtotal =
+        existingCartItem.quantity * Number(item.price);
+      return await this.cartItemRepository.save(existingCartItem);
+    }
 
-    const total = createCartItemDto.quantity * Number(item.price);
+    const subtotal = createCartItemDto.quantity * Number(item.price);
 
     const result = this.cartItemRepository.create({
       quantity: createCartItemDto.quantity,
-      total,
+      
+      subtotal,
       cart: cart,
       item,
     });
-
+  
     return await this.cartItemRepository.save(result);
   }
 
@@ -85,7 +102,17 @@ export class CartItemService {
     }
 
     filters.cart = { id: cart.id };
-
+  const cartItems= await this.cartItemRepository.find({
+   where:{
+    cart:{
+      id:cart.id
+          }
+   }
+  })
+  const t = cartItems.reduce((acc, curr) => {
+    return acc + curr.subtotal;
+  }, 0);
+  const total= Number(t +5)
     const { data, pagination } = await paginate<CartItem>(
       this.cartItemRepository,
       ['item', 'cart'],
@@ -95,7 +122,7 @@ export class CartItemService {
       filters,
       sort,
     );
-    return { data, pagination };
+    return { data, pagination ,total};
   }
 
   async findOne(id: number) {
@@ -141,12 +168,12 @@ export class CartItemService {
   
     // إعادة حساب المجموع بناءً على السعر والكمية
     if (item && getOne.quantity !== undefined) {
-      getOne.total = getOne.quantity * Number(item.price);
+      getOne.subtotal = getOne.quantity * Number(item.price);
     }
   
     // أو إذا تم إرسال total يدويًا
-    if (updateCartItemDto.total !== undefined) {
-      getOne.total = updateCartItemDto.total;
+    if (updateCartItemDto.subtotal !== undefined) {
+      getOne.subtotal = updateCartItemDto.subtotal;
     }
   
     return await this.cartItemRepository.save(getOne);

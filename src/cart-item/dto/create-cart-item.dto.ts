@@ -13,9 +13,7 @@ export class CreateCartItemDto {
   @IsPositive()
   quantity: number;
   @IsOptional()
-  @IsInt()
-  @IsPositive()
-  total: number;
+ 
   @IsInt()
   @IsPositive()
   subtotal: number;

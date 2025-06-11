@@ -39,7 +39,7 @@ export class CartItemController {
     const user= await this.userRepository.findOne({where:{email:userEmail
     }})
     const userId=user?.id
-    console.log(userId)
+    
     const data = await this.cartItemService.create(createCartItemDto,userId);
     return {
       message: 'Cart-Item created successfully',
@@ -59,11 +59,12 @@ export class CartItemController {
     }})
     const userId=user?.id
   
-    const { data, pagination } = await this.cartItemService.findAll(paginationQueryDto, filters,userId);
+    const { data, pagination ,total} = await this.cartItemService.findAll(paginationQueryDto, filters,userId);
     return {
       success: true,
       message: 'Cart-Items fetched successfully',
       data,
+      total,
       pagination,
     };
   }
