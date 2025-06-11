@@ -44,7 +44,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<Omit<User, 'password'> | null> {
-    const user = await this.userRepository.findOne({ where: { email:email } });
+    const user = await this.userRepository.findOne({ where: { email: email } });
     if (user && (await bcrypt.compare(password, user.password))) {
       const { password, ...rest } = user;
       return rest;
