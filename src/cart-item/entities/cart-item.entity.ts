@@ -24,8 +24,9 @@ export class CartItem {
   @Column()
   quantity: number;
   @Column()
+  subtotal: number;
+  @Column()
   total: number;
-
   @CreateDateColumn()
   createdAt: Date;
 

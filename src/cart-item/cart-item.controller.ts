@@ -8,7 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
-  Request
+  Request,
+  Put
 } from '@nestjs/common';
 import { CartItemService } from './cart-item.service';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
@@ -57,7 +58,7 @@ export class CartItemController {
     const user= await this.userRepository.findOne({where:{email:userEmail
     }})
     const userId=user?.id
-    console.log(userId)
+  
     const { data, pagination } = await this.cartItemService.findAll(paginationQueryDto, filters,userId);
     return {
       success: true,
@@ -79,20 +80,32 @@ export class CartItemController {
  }
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN,UserRole.User)
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id') id: number,
     @Body() updateCartItemDto: UpdateCartItemDto,
   ) {
-    return this.cartItemService.update(+id, updateCartItemDto);
+    const result = await this.cartItemService.update(id,updateCartItemDto)
+    return{
+     message:"Cart-Item updated successfully",
+     success:true,
+     data:result
+   
   }
 
+}
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN,UserRole.User)
-  remove(@Param('id') id: string) {
-    return this.cartItemService.remove(+id);
-  }
+  async remove(@Param('id') id: number) {
+    await  this.cartItemService.remove(+id);
+  
+  return{
+    message:"Cart-Item deleted successfully",
+    success:true,
+
+  
+ }}
 }

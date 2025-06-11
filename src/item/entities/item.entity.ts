@@ -22,12 +22,12 @@ export class Item {
   @Column()
   price: string;
   @ManyToOne(() => Category, (category) => category.items, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   category: Category;
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.item, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   cartItems: CartItem;
 

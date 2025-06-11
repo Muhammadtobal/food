@@ -10,50 +10,62 @@ import { ItemService } from 'src/item/item.service';
 import { Item } from 'src/item/entities/item.entity';
 import { PaginationQueryDto } from 'src/utils/paginateDto';
 import { paginate } from 'src/utils/paginate';
+import { observeNotification } from 'rxjs/internal/Notification';
 
 @Injectable()
 export class CartItemService {
   constructor(
-   
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
     @InjectRepository(Cart)
     private readonly CartRepository: Repository<Cart>,
     @InjectRepository(CartItem)
     private readonly cartItemRepository: Repository<CartItem>,
-    
   ) {}
-  async create(createCartItemDto: CreateCartItemDto,userId:number |undefined): Promise<CartItem > {
-   
-    const cart = await this.CartRepository.findOne({where:{user:{
-      id:userId
-    }}});
+  async create(
+    createCartItemDto: CreateCartItemDto,
+    userId: number | undefined,
+  ): Promise<CartItem> {
+    const cart = await this.CartRepository.findOne({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
     if (!cart) {
-      throw new NotFoundException(`Cart with ID ${createCartItemDto.cartId} not found`);
+      throw new NotFoundException(
+        `Cart with ID ${createCartItemDto.cartId} not found`,
+      );
     }
-  
-    const item = await this.itemRepository.findOne({where:{id:createCartItemDto.itemId}});
+
+    const item = await this.itemRepository.findOne({
+      where: { id: createCartItemDto.itemId },
+    });
     if (!item) {
-      throw new NotFoundException(`Item with ID ${createCartItemDto.itemId} not found`);
+      throw new NotFoundException(
+        `Item with ID ${createCartItemDto.itemId} not found`,
+      );
     }
-  
 
     const total = createCartItemDto.quantity * Number(item.price);
- 
+
     const result = this.cartItemRepository.create({
       quantity: createCartItemDto.quantity,
       total,
-      cart:cart, 
+      cart: cart,
       item,
     });
-  
-    
+
     return await this.cartItemRepository.save(result);
   }
-  
 
-  async  findAll(paginationQueryDto:PaginationQueryDto,filters:any,userId:number | undefined) {
-let { page, limit, allData, sortBy, order } = paginationQueryDto;
+  async findAll(
+    paginationQueryDto: PaginationQueryDto,
+    filters: any,
+    userId: number | undefined,
+  ) {
+    let { page, limit, allData, sortBy, order } = paginationQueryDto;
     page = Number(page) || 1;
     limit = Number(limit) || 10;
     const sortField = sortBy || 'id';
@@ -61,40 +73,94 @@ let { page, limit, allData, sortBy, order } = paginationQueryDto;
     const sort: Record<string, 'ASC' | 'DESC'> = {
       [sortField]: order === 'asc' ? 'ASC' : 'DESC',
     };
-    const cart = await this.CartRepository.findOne({where:{user:{
-      id:userId
-    }}});
+    const cart = await this.CartRepository.findOne({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
     if (!cart) {
       throw new NotFoundException(`Cart with ID  not found`);
     }
-      
-filters.cart={id:cart.id}
-     
+
+    filters.cart = { id: cart.id };
+
     const { data, pagination } = await paginate<CartItem>(
       this.cartItemRepository,
-      ['item','cart'],
+      ['item', 'cart'],
       page,
       limit,
       allData,
       filters,
       sort,
     );
-   return {data,pagination}
+    return { data, pagination };
   }
 
   async findOne(id: number) {
-const getOne= await this.cartItemRepository.findOne({where:{id},relations:['item','cart']})
-if(!getOne){
-  throw new NotFoundException(`the Cart-Item Not Found with ${id}`)
-}
-return getOne
+    const getOne = await this.cartItemRepository.findOne({
+      where: { id },
+      relations: ['item', 'cart'],
+    });
+    if (!getOne) {
+      throw new NotFoundException(`the Cart-Item Not Found with ${id}`);
+    }
+    return getOne;
   }
 
-  update(id: number, updateCartItemDto: UpdateCartItemDto) {
-    return `This action updates a #${id} cartItem`;
+  async update(id: number, updateCartItemDto: UpdateCartItemDto) {
+    const getOne = await this.cartItemRepository.findOne({
+      where: { id },
+      relations: ['item', 'cart'],
+    });
+  
+    if (!getOne) {
+      throw new NotFoundException(`Cart item not found with id ${id}`);
+    }
+  
+    // تحديث item فقط إذا تم إرساله في الـ DTO
+    let item : Item | null= getOne.item;
+  
+    if (updateCartItemDto.itemId !== undefined) {
+      item = await this.itemRepository.findOne({
+        where: { id: updateCartItemDto.itemId },
+      });
+  
+      if (!item) {
+        throw new NotFoundException(`Item not found with id ${updateCartItemDto.itemId}`);
+      }
+  
+      getOne.item = item;
+    }
+  
+    // تحديث الكمية (إن وُجدت)
+    if (updateCartItemDto.quantity !== undefined) {
+      getOne.quantity = updateCartItemDto.quantity;
+    }
+  
+    // إعادة حساب المجموع بناءً على السعر والكمية
+    if (item && getOne.quantity !== undefined) {
+      getOne.total = getOne.quantity * Number(item.price);
+    }
+  
+    // أو إذا تم إرسال total يدويًا
+    if (updateCartItemDto.total !== undefined) {
+      getOne.total = updateCartItemDto.total;
+    }
+  
+    return await this.cartItemRepository.save(getOne);
   }
+  
 
-  remove(id: number) {
-    return `This action removes a #${id} cartItem`;
+  async remove(id: number): Promise<void> {
+    const getOne = await this.cartItemRepository.findOne({
+      where: { id },
+      relations: ['item', 'cart'],
+    });
+    if (!getOne) {
+      throw new NotFoundException(`the Cart-Item Not Found with ${id}`);
+    }
+    await this.cartItemRepository.delete(id);
   }
 }

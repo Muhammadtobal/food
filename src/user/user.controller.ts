@@ -1,9 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  Put,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PaginationQueryDto } from 'src/utils/paginateDto';
+import { filter } from 'rxjs';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -13,22 +25,51 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Query() queryParams: any,
+  ) {
+    const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+    const { data, pagination } = await this.userService.findAll(
+      paginationQueryDto,
+      filters,
+    );
+    return {
+      message: 'Users fetched successfully',
+      success: true,
+
+      data: data,
+      pagination,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: number) {
+ const data = await this.userService.findOne(id)
+ return {
+  message: 'Users fetched successfully',
+  success: true,
+  data:data
+ }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+   const data= await this.userService.update(id,updateUserDto)
+   return {
+    message: 'Users updated successfully',
+    success: true,
+    data:data
+   } 
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+ async remove(@Param('id') id: number) {
+   await this.userService.remove(id)
+   return {
+    message: 'Users deleted successfully',
+    success: true,
+
+   } 
   }
 }
