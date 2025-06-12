@@ -11,7 +11,6 @@ import { CartModule } from './cart/cart.module';
 import { CartItemModule } from './cart-item/cart-item.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { PaymentModule } from './payment/payment.module';
 
 import  AppDataSource from './config/typeorm.config';
 
@@ -19,7 +18,7 @@ import  AppDataSource from './config/typeorm.config';
   imports: [
      ConfigModule.forRoot({isGlobal:true}),
      TypeOrmModule.forRoot(AppDataSource.options),
-    ItemModule, OrderModule, CategoryModule, DeliveryInformationModule, CartModule, CartItemModule, AuthModule, UserModule, PaymentModule],
+    ItemModule, OrderModule, CategoryModule, DeliveryInformationModule, CartModule, CartItemModule, AuthModule, UserModule],
   controllers: [AppController],
   providers: [AppService],
 })
