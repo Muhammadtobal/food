@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -81,7 +81,7 @@ export class CartItemService {
     paginationQueryDto: PaginationQueryDto,
     filters: any,
     userId: number | undefined,
-  ) {
+  ) : Promise<{ data: CartItem[]; pagination: any ,total:any}>{
     let { page, limit, allData, sortBy, order } = paginationQueryDto;
     page = Number(page) || 1;
     limit = Number(limit) || 10;
@@ -125,7 +125,7 @@ export class CartItemService {
     return { data, pagination ,total};
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<CartItem | null> {
     const getOne = await this.cartItemRepository.findOne({
       where: { id },
       relations: ['item', 'cart'],
@@ -136,7 +136,7 @@ export class CartItemService {
     return getOne;
   }
 
-  async update(id: number, updateCartItemDto: UpdateCartItemDto) {
+  async update(id: number, updateCartItemDto: UpdateCartItemDto):Promise<CartItem | null> {
     const getOne = await this.cartItemRepository.findOne({
       where: { id },
       relations: ['item', 'cart'],
@@ -189,5 +189,23 @@ export class CartItemService {
       throw new NotFoundException(`the Cart-Item Not Found with ${id}`);
     }
     await this.cartItemRepository.delete(id);
+  }
+  async updateCartItemQuantity(updateCartItemDto:UpdateCartItemDto):Promise <CartItem | null>{
+    const getOne = await this.cartItemRepository.findOne({
+      where: { item:{
+        id:updateCartItemDto?.itemId
+      } },
+      relations: ['item', 'cart'],
+    });
+    if (!getOne) {
+      throw new NotFoundException(`the Cart-Item Not Found with `);
+    }
+  if(getOne.quantity>0){
+    getOne.quantity= Number(getOne.quantity -1)
+    getOne.subtotal=Number(getOne.item.price) *  getOne.quantity
+  }else{
+    throw new BadRequestException("the Quantity has been 0")
+  }
+  return await this.cartItemRepository.save(getOne);
   }
 }

@@ -109,4 +109,21 @@ export class CartItemController {
 
   
  }}
+
+ @Patch(':id')
+ @UseGuards(AuthGuard('jwt'), RolesGuard)
+ @Roles(UserRole.ADMIN,UserRole.User)
+ async updateCartItemQuantity(
+   @Param('id') id: number,
+   @Body() updateCartItemDto: UpdateCartItemDto,
+ ) {
+   const result = await this.cartItemService.updateCartItemQuantity(updateCartItemDto)
+   return{
+    message:"Cart-Item updated successfully",
+    success:true,
+    data:result
+  
+ }
+
+}
 }
