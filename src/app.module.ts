@@ -13,13 +13,28 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 
 
-import  AppDataSource from './config/typeorm.config';
+
+import AppDataSource from './config/typeorm.config';
 
 @Module({
   imports: [
+<<<<<<< HEAD
      ConfigModule.forRoot({isGlobal:true}),
      TypeOrmModule.forRoot(AppDataSource.options),
     ItemModule, OrderModule, CategoryModule, DeliveryInformationModule, CartModule, CartItemModule, AuthModule, UserModule],
+=======
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRoot(AppDataSource.options),
+    ItemModule,
+    OrderModule,
+    CategoryModule,
+    DeliveryInformationModule,
+    CartModule,
+    CartItemModule,
+    AuthModule,
+    UserModule,
+  ],
+>>>>>>> a04bdffd5e120a42eabfc28f61fde1d36de4fb23
   controllers: [AppController],
   providers: [AppService],
 })
