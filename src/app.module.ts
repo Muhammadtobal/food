@@ -18,11 +18,11 @@ import AppDataSource from './config/typeorm.config';
 
 @Module({
   imports: [
-<<<<<<< HEAD
+ 
      ConfigModule.forRoot({isGlobal:true}),
      TypeOrmModule.forRoot(AppDataSource.options),
     ItemModule, OrderModule, CategoryModule, DeliveryInformationModule, CartModule, CartItemModule, AuthModule, UserModule],
-=======
+
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(AppDataSource.options),
     ItemModule,
@@ -34,7 +34,7 @@ import AppDataSource from './config/typeorm.config';
     AuthModule,
     UserModule,
   ],
->>>>>>> a04bdffd5e120a42eabfc28f61fde1d36de4fb23
+
   controllers: [AppController],
   providers: [AppService],
 })
