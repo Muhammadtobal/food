@@ -8,17 +8,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './jwtstrategy';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { DeliveryInformationModule } from 'src/delivery-information/delivery-information.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User,Cart]),
+    TypeOrmModule.forFeature([User, Cart]),
+    DeliveryInformationModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'superSecretKey',
       signOptions: { expiresIn: '15' },
     }),
   ],
-  providers: [AuthService,JwtStrategy,LocalStrategy],
+  providers: [AuthService, JwtStrategy, LocalStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

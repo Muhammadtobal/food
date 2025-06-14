@@ -9,11 +9,19 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserRole } from 'src/utils/types';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { CreateDeliveryInformationDto } from 'src/delivery-information/dto/create-delivery-information.dto';
+import { DeliveryInformationService } from 'src/delivery-information/delivery-information.service';
+import { UpdateCartDto } from 'src/cart/dto/update-cart.dto';
+import { UpdateDeliveryInformationDto } from 'src/delivery-information/dto/update-delivery-information.dto';
+import { DeliveryInformation } from 'src/delivery-information/entities/delivery-information.entity';
 
 @Controller('stripe')
 export class StripeController {
   constructor(
+    @InjectRepository(DeliveryInformation)
+    private readonly deliveryRepo: Repository<DeliveryInformation>,
     private readonly stripeService: StripeService,
+    private readonly deliveryInformationService: DeliveryInformationService,
     @InjectRepository(CartItem)
     private readonly cartItemRepo: Repository<CartItem>,
     @InjectRepository(Cart)
@@ -23,8 +31,25 @@ export class StripeController {
   @Post('checkout')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.User)
-  async checkout(@Request() req) {
-    console.log(req.user);
+  async checkout(
+    @Request() req,
+    @Body() updateDeliveryInformationDto: UpdateDeliveryInformationDto,
+  ) {
+    const delivery = await this.deliveryRepo.findOne({
+      where: {
+        user: {
+          id: req.user.userId,
+        },
+      },
+      relations: ['user'],
+    });
+
+    if (delivery)
+      await this.deliveryInformationService.update(
+        delivery?.id,
+        updateDeliveryInformationDto,
+      );
+
     const cart = await this.cartRepository.findOne({
       where: {
         user: {

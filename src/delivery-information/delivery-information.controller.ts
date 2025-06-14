@@ -21,19 +21,19 @@ export class DeliveryInformationController {
     private readonly deliveryInformationService: DeliveryInformationService,
   ) {}
 
-  @Post()
-  async create(
-    @Body() createDeliveryInformationDto: CreateDeliveryInformationDto,
-  ) {
-    const result = await this.deliveryInformationService.create(
-      createDeliveryInformationDto,
-    );
-    return {
-      success: true,
-      message: 'delivery-information created successfully',
-      data: result,
-    };
-  }
+  // @Post()
+  // async create(
+  //   @Body() createDeliveryInformationDto: CreateDeliveryInformationDto,
+  // ) {
+  //   const result = await this.deliveryInformationService.create(
+  //     createDeliveryInformationDto
+  //   );
+  //   return {
+  //     success: true,
+  //     message: 'delivery-information created successfully',
+  //     data: result,
+  //   };
+  // }
 
   @Get()
   async findAll(
@@ -41,7 +41,10 @@ export class DeliveryInformationController {
     @Query() queryParams: any,
   ) {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    const { data, pagination } = await this.deliveryInformationService.findAll(paginationQueryDto, filters);
+    const { data, pagination } = await this.deliveryInformationService.findAll(
+      paginationQueryDto,
+      filters,
+    );
     return {
       success: true,
       message: 'delivery-information fetched successfully',
@@ -52,35 +55,36 @@ export class DeliveryInformationController {
 
   @Get(':id')
   async findOne(@Param('id') id: number) {
-  const result = await this.deliveryInformationService.findOne(id)
-  return {
-    success: true,
-    message: 'delivery-information fetched successfully',
-    data:result,
-
-  };
+    const result = await this.deliveryInformationService.findOne(id);
+    return {
+      success: true,
+      message: 'delivery-information fetched successfully',
+      data: result,
+    };
   }
 
   @Put(':id')
- async update(
+  async update(
     @Param('id') id: number,
     @Body() updateDeliveryInformationDto: UpdateDeliveryInformationDto,
   ) {
- const result = await this.deliveryInformationService.update(id,updateDeliveryInformationDto)
-   return {
-    success: true,
-    message: 'delivery-information updated successfully',
-    data:result,
-   }
+    const result = await this.deliveryInformationService.update(
+      id,
+      updateDeliveryInformationDto,
+    );
+    return {
+      success: true,
+      message: 'delivery-information updated successfully',
+      data: result,
+    };
   }
 
   @Delete(':id')
   async remove(@Param('id') id: number) {
-    await this.deliveryInformationService.remove(id)
+    await this.deliveryInformationService.remove(id);
     return {
       success: true,
       message: 'Delivery-Information deleted successfully',
     };
-  
   }
 }

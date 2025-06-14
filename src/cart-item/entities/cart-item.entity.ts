@@ -1,5 +1,6 @@
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Item } from 'src/item/entities/item.entity';
+import { Order } from 'src/order/entities/order.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -16,7 +17,7 @@ export class CartItem {
   @PrimaryGeneratedColumn()
   id: number;
   @ManyToOne(() => Cart, (cart) => cart.cartItems, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cartId' }) 
+  @JoinColumn({ name: 'cartId' })
   cart: Cart;
   @ManyToOne(() => Item, (item) => item.cartItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'itemId' })
@@ -25,7 +26,7 @@ export class CartItem {
   quantity: number;
   @Column()
   subtotal: number;
-  
+
   @CreateDateColumn()
   createdAt: Date;
 

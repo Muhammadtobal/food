@@ -14,10 +14,14 @@ export class DeliveryInformationService {
     @InjectRepository(DeliveryInformation)
     private readonly deliveryInformationRepository: Repository<DeliveryInformation>,
   ) {}
-  async create(createDeliveryInformationDto: CreateDeliveryInformationDto) {
-    const result = await this.deliveryInformationRepository.create(
-      createDeliveryInformationDto,
-    );
+  async create(
+    createDeliveryInformationDto: CreateDeliveryInformationDto,
+    userId: number,
+  ) {
+    const result = await this.deliveryInformationRepository.create({
+      ...createDeliveryInformationDto,
+      user: { id: userId },
+    });
     return await this.deliveryInformationRepository.save(result);
   }
 
@@ -58,7 +62,7 @@ export class DeliveryInformationService {
   async update(
     id: number,
     updateDeliveryInformationDto: UpdateDeliveryInformationDto,
-  ) :Promise<DeliveryInformation>{
+  ): Promise<DeliveryInformation> {
     const getOne = await this.deliveryInformationRepository.findOne({
       where: { id },
     });

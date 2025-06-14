@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsEmail, IsPhoneNumber, IsPostalCode } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEmail,
+  IsPhoneNumber,
+  IsPostalCode,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateDeliveryInformationDto {
   @IsNotEmpty()
@@ -11,7 +19,7 @@ export class CreateDeliveryInformationDto {
 
   @IsNotEmpty()
   @IsEmail()
-  email: string;
+  emailD: string;
 
   @IsNotEmpty()
   @IsString()
@@ -30,10 +38,13 @@ export class CreateDeliveryInformationDto {
   country: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber() 
+  @IsPhoneNumber()
   phone: string;
 
   @IsNotEmpty()
   @IsPostalCode('any')
   zipCode: string;
+  @IsOptional()
+  @IsNumber()
+  userId: number;
 }

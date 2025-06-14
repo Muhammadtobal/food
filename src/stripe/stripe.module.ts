@@ -6,10 +6,15 @@ import { StripeService } from './stripe.service';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { CartModule } from 'src/cart/cart.module';
 import { CartItemModule } from 'src/cart-item/cart-item.module';
+import { DeliveryInformationModule } from 'src/delivery-information/delivery-information.module';
+import { DeliveryInformation } from 'src/delivery-information/entities/delivery-information.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CartItem,Cart]),CartModule,CartItemModule
+    TypeOrmModule.forFeature([CartItem, Cart, DeliveryInformation]),
+    CartModule,
+    CartItemModule,
+    DeliveryInformationModule,
   ],
   controllers: [StripeController],
   providers: [StripeService],
