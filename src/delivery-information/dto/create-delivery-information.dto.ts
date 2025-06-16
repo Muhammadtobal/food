@@ -39,7 +39,7 @@ export class CreateDeliveryInformationDto {
   country: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber()
+  @IsString()
   phone: string;
 
   @IsNotEmpty()
