@@ -8,6 +8,7 @@ import {
   Delete,
   Request,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -20,6 +21,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserRole } from 'src/utils/types';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { PaginationQueryDto } from 'src/utils/paginateDto';
 
 @Controller('orders')
 export class OrderController {
@@ -28,7 +30,7 @@ export class OrderController {
   @Roles(UserRole.ADMIN, UserRole.User)
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto, @Request() req) {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const data = await this.orderService.create(createOrderDto, userId);
     return {
@@ -38,13 +40,38 @@ export class OrderController {
   }
 
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.User)
+  async findAll(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Query() queryParams: any,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+    const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+
+    const { data, pagination } = await this.orderService.findAll(
+      paginationQueryDto,
+      filters,
+      userId,
+    );
+    return {
+      message: 'Order fetched Successfully',
+      data,
+      pagination,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.User)
+  async findOne(@Request() req) {
+    const userId = req.user.userId;
+    const result = await this.orderService.findOne(userId);
+    return {
+      message: 'Order fetched Successfully',
+      data: result,
+    };
   }
 
   @Patch(':id')

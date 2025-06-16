@@ -6,6 +6,8 @@ import { CartItem } from 'src/cart-item/entities/cart-item.entity';
 import { Repository } from 'typeorm';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Order } from './entities/order.entity';
+import { PaginationQueryDto } from 'src/utils/paginateDto';
+import { paginate } from 'src/utils/paginate';
 
 @Injectable()
 export class OrderService {
@@ -25,6 +27,7 @@ export class OrderService {
         },
       },
     });
+
     if (!cart) {
       throw new NotFoundException('Cart not found for this user');
     }
@@ -34,12 +37,68 @@ export class OrderService {
     return await this.orderRepository.save(result);
   }
 
-  findAll() {
-    return `This action returns all order`;
+  async findAll(
+    paginationQueryDto: PaginationQueryDto,
+    filters: any,
+    userId: number | undefined,
+  ): Promise<{ data: Order[]; pagination: any }> {
+    let { page, limit, allData, sortBy, order } = paginationQueryDto;
+    page = Number(page) || 1;
+    limit = Number(limit) || 10;
+    const sortField = sortBy || 'id';
+
+    const sort: Record<string, 'ASC' | 'DESC'> = {
+      [sortField]: order === 'asc' ? 'ASC' : 'DESC',
+    };
+
+    const cart = await this.cartRepository.findOne({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+    if (!cart) {
+      throw new NotFoundException('Cart not found for this user');
+    }
+    const getOrder = await this.orderRepository.findOne({
+      where: {
+        cart: {
+          id: cart.id,
+        },
+      },
+    });
+    const { data, pagination } = await paginate<Order>(
+      this.orderRepository,
+      ['cart'],
+      page,
+      limit,
+      allData,
+      filters,
+      sort,
+    );
+    return { data, pagination };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(userId: number): Promise<Order | null> {
+    const cart = await this.cartRepository.findOne({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+    if (!cart) {
+      throw new NotFoundException('Cart not found for this user');
+    }
+    const getOrder = await this.orderRepository.findOne({
+      where: {
+        cart: {
+          id: cart.id,
+        },
+      },
+    });
+    return getOrder;
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {
