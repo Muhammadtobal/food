@@ -1,5 +1,13 @@
 // stripe/stripe.controller.ts
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from 'src/cart-item/entities/cart-item.entity';
 import { Repository } from 'typeorm';
@@ -31,6 +39,13 @@ export class StripeController {
   @Post('checkout')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.User)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  )
   async checkout(
     @Request() req,
     @Body() updateDeliveryInformationDto: UpdateDeliveryInformationDto,

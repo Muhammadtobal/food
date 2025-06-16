@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -46,5 +47,6 @@ export class CreateDeliveryInformationDto {
   zipCode: string;
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   userId: number;
 }

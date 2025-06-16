@@ -10,6 +10,7 @@ import {
   UploadedFile,
   Query,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -17,12 +18,18 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { uploadImage } from 'src/utils/multer-options';
 import { PaginationQueryDto } from 'src/utils/paginateDto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { UserRole } from 'src/utils/types';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('items')
 export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('image', uploadImage('items', 'item')))
   async create(
     @Body() createItemDto: CreateItemDto,
@@ -55,6 +62,10 @@ export class ItemController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.User)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
   async findOne(@Param('id') id: number) {
     const result = await this.itemService.findOne(id);
     return {
@@ -65,6 +76,8 @@ export class ItemController {
   }
 
   @Put(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('image', uploadImage('items', 'item')))
   async update(
     @Param('id') id: number,

@@ -101,8 +101,16 @@ export class OrderService {
     return getOrder;
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(
+    id: number,
+    updateOrderDto: UpdateOrderDto,
+  ): Promise<Order | null> {
+    const getOne = await this.orderRepository.findOne({ where: { id } });
+    if (!getOne) {
+      throw new NotFoundException('The order not found');
+    }
+    const newOrder = Object.assign(getOne, updateOrderDto);
+    return await this.orderRepository.save(newOrder);
   }
 
   remove(id: number) {

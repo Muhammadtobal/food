@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
-
+import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -27,6 +27,7 @@ async function bootstrap() {
     origin: ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
   });
+
   app.setGlobalPrefix('api/v1');
   const config = new DocumentBuilder()
     .setTitle('My API')

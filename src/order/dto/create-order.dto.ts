@@ -15,7 +15,7 @@ export class CreateOrderDto {
   @IsOptional()
   @IsInt()
   deliveryId: number;
-  @IsOptional()
+
   @IsEnum(OrderStatus)
   @IsOptional()
   status?: OrderStatus;
