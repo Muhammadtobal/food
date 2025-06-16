@@ -19,7 +19,7 @@ export class OrderService {
     @InjectRepository(Cart)
     private readonly cartRepository: Repository<Cart>,
   ) {}
-  async create(createOrderDto: CreateOrderDto, userId: number): Promise<Order> {
+  async create(userId: number): Promise<Order> {
     const cart = await this.cartRepository.findOne({
       where: {
         user: {

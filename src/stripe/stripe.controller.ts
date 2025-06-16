@@ -24,7 +24,10 @@ import { UpdateDeliveryInformationDto } from 'src/delivery-information/dto/updat
 import { DeliveryInformation } from 'src/delivery-information/entities/delivery-information.entity';
 import { OrderService } from 'src/order/order.service';
 import { CreateOrderDto } from 'src/order/dto/create-order.dto';
-
+class CheckoutDto {
+  updateDeliveryInformationDto: UpdateDeliveryInformationDto;
+  createOrderDto: CreateOrderDto;
+}
 @Controller('stripe')
 export class StripeController {
   constructor(
@@ -52,7 +55,6 @@ export class StripeController {
   async checkout(
     @Request() req,
     @Body() updateDeliveryInformationDto: UpdateDeliveryInformationDto,
-    @Body() createOrderDto: CreateOrderDto,
   ) {
     const delivery = await this.deliveryRepo.findOne({
       where: {
@@ -77,7 +79,7 @@ export class StripeController {
       },
     });
 
-    await this.orderService.create(createOrderDto, req.user.userId);
+    await this.orderService.create(req.user.userId);
     const cartItems = await this.cartItemRepo.find({
       where: {
         cart: {

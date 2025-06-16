@@ -9,10 +9,11 @@ import { CartItemModule } from 'src/cart-item/cart-item.module';
 import { DeliveryInformationModule } from 'src/delivery-information/delivery-information.module';
 import { DeliveryInformation } from 'src/delivery-information/entities/delivery-information.entity';
 import { OrderModule } from 'src/order/order.module';
+import { Order } from 'src/order/entities/order.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CartItem, Cart, DeliveryInformation]),
+    TypeOrmModule.forFeature([CartItem, Cart, DeliveryInformation, Order]),
     CartModule,
     CartItemModule,
     DeliveryInformationModule,

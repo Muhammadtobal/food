@@ -12,10 +12,6 @@ import { OrderStatus } from 'src/utils/types';
 import { CreateDeliveryInformationDto } from 'src/delivery-information/dto/create-delivery-information.dto';
 
 export class CreateOrderDto {
-  @IsOptional()
-  @IsInt()
-  deliveryId: number;
-
   @IsEnum(OrderStatus)
   @IsOptional()
   status?: OrderStatus;

@@ -35,7 +35,7 @@ export class OrderController {
   async create(@Body() createOrderDto: CreateOrderDto, @Request() req) {
     const userId = req.user.userId;
 
-    const data = await this.orderService.create(createOrderDto, userId);
+    const data = await this.orderService.create(userId);
     return {
       message: 'Order Created Successfully',
       data: data,
