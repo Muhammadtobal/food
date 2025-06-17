@@ -25,22 +25,27 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserRole } from 'src/utils/types';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { PaginationQueryDto } from 'src/utils/paginateDto';
+import { DeliveryInformation } from 'src/delivery-information/entities/delivery-information.entity';
 
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.User)
-  @Post()
-  async create(@Body() createOrderDto: CreateOrderDto, @Request() req) {
-    const userId = req.user.userId;
+  constructor(
+    private readonly orderService: OrderService,
+    @InjectRepository(DeliveryInformation)
+    private readonly deliveryIRepo: Repository<DeliveryInformation>,
+  ) {}
+  // @UseGuards(AuthGuard('jwt'), RolesGuard)
+  // @Roles(UserRole.ADMIN, UserRole.User)
+  // @Post()
+  // async create(@Body() createOrderDto: CreateOrderDto, @Request() req) {
+  //   const userId = req.user.userId;
 
-    const data = await this.orderService.create(userId);
-    return {
-      message: 'Order Created Successfully',
-      data: data,
-    };
-  }
+  //   const data = await this.orderService.create(userId);
+  //   return {
+  //     message: 'Order Created Successfully',
+  //     data: data,
+  //   };
+  // }
 
   @Get()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -53,15 +58,15 @@ export class OrderController {
     const userId = req.user.userId;
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
 
-    const { data, pagination } = await this.orderService.findAll(
-      paginationQueryDto,
-      filters,
-      userId,
-    );
+    const { data, pagination, length, result, sumPrice } =
+      await this.orderService.findAll(paginationQueryDto, filters, userId);
     return {
       message: 'Order fetched Successfully',
       data,
       pagination,
+      length,
+      result,
+      sumPrice,
     };
   }
 

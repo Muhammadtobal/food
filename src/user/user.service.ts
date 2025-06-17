@@ -13,8 +13,9 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const result = await this.userRepository.create(createUserDto);
+    return await this.userRepository.save(result);
   }
 
   async findAll(paginationQueryDto: PaginationQueryDto, filters: any) {

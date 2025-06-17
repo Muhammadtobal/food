@@ -9,11 +9,13 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './jwtstrategy';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { DeliveryInformationModule } from 'src/delivery-information/delivery-information.module';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Cart]),
     DeliveryInformationModule,
+
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'superSecretKey',

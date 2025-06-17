@@ -54,23 +54,8 @@ export class StripeController {
   )
   async checkout(
     @Request() req,
-    @Body() updateDeliveryInformationDto: UpdateDeliveryInformationDto,
+    @Body() createDeliveryInformationDto: CreateDeliveryInformationDto,
   ) {
-    const delivery = await this.deliveryRepo.findOne({
-      where: {
-        user: {
-          id: req.user.userId,
-        },
-      },
-      relations: ['user'],
-    });
-
-    if (delivery)
-      await this.deliveryInformationService.update(
-        delivery?.id,
-        updateDeliveryInformationDto,
-      );
-
     const cart = await this.cartRepository.findOne({
       where: {
         user: {
@@ -78,8 +63,12 @@ export class StripeController {
         },
       },
     });
+    const delivery = await this.deliveryInformationService.create(
+      createDeliveryInformationDto,
+    );
 
-    await this.orderService.create(req.user.userId);
+    await this.orderService.create(req.user.userId, delivery);
+
     const cartItems = await this.cartItemRepo.find({
       where: {
         cart: {

@@ -27,8 +27,9 @@ export class Cart {
     default: 'active',
   })
   status: 'active' | 'completed' | 'cancelled';
-  @OneToOne(() => Order, (order) => order.cart)
-  order: Order;
+  @OneToMany(() => Order, (order) => order.cart)
+  orders: Order[];
+
   @OneToMany(() => CartItem, (cartItem) => cartItem.cart)
   cartItems: CartItem[];
   @CreateDateColumn()

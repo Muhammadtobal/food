@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -16,7 +17,7 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Cart, (cart) => cart.order, {
+  @ManyToOne(() => Cart, (cart) => cart.orders, {
     cascade: true,
   })
   @JoinColumn()
@@ -27,6 +28,11 @@ export class Order {
     default: OrderStatus.FOOD_PROCESSING,
   })
   status: OrderStatus;
+  @ManyToOne(() => DeliveryInformation, (delivery) => delivery.orders, {
+    cascade: true,
+  })
+  @JoinColumn()
+  delivery: DeliveryInformation;
 
   @CreateDateColumn()
   createdAt: Date;

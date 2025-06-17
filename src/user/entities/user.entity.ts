@@ -23,8 +23,7 @@ export class User {
   password: string;
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
-  @OneToOne(() => DeliveryInformation, (delivery) => delivery.user)
-  delivery: DeliveryInformation;
+
   @CreateDateColumn()
   createdAt: Date;
 

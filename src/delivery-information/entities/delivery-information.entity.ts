@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -32,11 +33,9 @@ export class DeliveryInformation {
   phone: string;
   @Column({ nullable: false })
   zipCode: string;
-  @OneToOne(() => User, (user) => user.delivery, {
-    cascade: true,
-  })
-  @JoinColumn()
-  user: User;
+  @OneToMany(() => Order, (order) => order.delivery)
+  orders: Order[];
+
   @CreateDateColumn()
   createdAt: Date;
 

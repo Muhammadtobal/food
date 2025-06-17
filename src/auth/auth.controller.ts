@@ -5,34 +5,35 @@ import {
   Request,
   UseGuards,
   Get,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { DeliveryInformationService } from 'src/delivery-information/delivery-information.service';
 import { CreateDeliveryInformationDto } from 'src/delivery-information/dto/create-delivery-information.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { UserRole } from 'src/utils/types';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly deliveryInformationService: DeliveryInformationService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(
-    @Body() createUserDto: CreateUserDto,
-    @Body() createDeliveryInformationDto: CreateDeliveryInformationDto,
-  ) {
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  )
+  async register(@Body() createUserDto: CreateUserDto) {
     const result = await this.authService.register(createUserDto);
-
-    await this.deliveryInformationService.create(
-      createDeliveryInformationDto,
-      result.id,
-    );
 
     return {
       success: true,

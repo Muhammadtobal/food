@@ -8,10 +8,14 @@ import { Cart } from 'src/cart/entities/cart.entity';
 import { Order } from './entities/order.entity';
 import { PaginationQueryDto } from 'src/utils/paginateDto';
 import { paginate } from 'src/utils/paginate';
+import { DeliveryInformationService } from 'src/delivery-information/delivery-information.service';
+import { CreateDeliveryInformationDto } from 'src/delivery-information/dto/create-delivery-information.dto';
+import { DeliveryInformation } from 'src/delivery-information/entities/delivery-information.entity';
 
 @Injectable()
 export class OrderService {
   constructor(
+    private readonly deliveryInformationService: DeliveryInformationService,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(CartItem)
@@ -19,7 +23,7 @@ export class OrderService {
     @InjectRepository(Cart)
     private readonly cartRepository: Repository<Cart>,
   ) {}
-  async create(userId: number): Promise<Order> {
+  async create(userId: any, delivery: DeliveryInformation): Promise<Order> {
     const cart = await this.cartRepository.findOne({
       where: {
         user: {
@@ -33,6 +37,7 @@ export class OrderService {
     }
     const result = await this.orderRepository.create({
       cart: cart,
+      delivery,
     });
     return await this.orderRepository.save(result);
   }
@@ -41,7 +46,13 @@ export class OrderService {
     paginationQueryDto: PaginationQueryDto,
     filters: any,
     userId: number | undefined,
-  ): Promise<{ data: Order[]; pagination: any }> {
+  ): Promise<{
+    data: Order[];
+    pagination: any;
+    length: any;
+    result: any;
+    sumPrice: any;
+  }> {
     let { page, limit, allData, sortBy, order } = paginationQueryDto;
     page = Number(page) || 1;
     limit = Number(limit) || 10;
@@ -61,23 +72,36 @@ export class OrderService {
     if (!cart) {
       throw new NotFoundException('Cart not found for this user');
     }
-    const getOrder = await this.orderRepository.findOne({
+    const getCartItem = await this.cartItemRepo.find({
       where: {
         cart: {
           id: cart.id,
         },
       },
+      relations: ['item'],
     });
+    const length = getCartItem.length;
+    // console.log(length);
+    const result = getCartItem.map((item) => ({
+      name: item.item.name,
+      quantity: item.quantity,
+    }));
+    const sumPrice = getCartItem.reduce((acc, curr) => {
+      return acc + Number(curr.item.price);
+    }, 0);
+
+    // console.log(result);
+    // console.log(getCartItem);
     const { data, pagination } = await paginate<Order>(
       this.orderRepository,
-      ['cart'],
+      ['cart', 'delivery'],
       page,
       limit,
       allData,
       filters,
       sort,
     );
-    return { data, pagination };
+    return { data, pagination, length, result, sumPrice };
   }
 
   async findOne(userId: number): Promise<Order | null> {

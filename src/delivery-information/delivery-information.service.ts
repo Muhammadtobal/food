@@ -14,14 +14,10 @@ export class DeliveryInformationService {
     @InjectRepository(DeliveryInformation)
     private readonly deliveryInformationRepository: Repository<DeliveryInformation>,
   ) {}
-  async create(
-    createDeliveryInformationDto: CreateDeliveryInformationDto,
-    userId: number,
-  ) {
-    const result = await this.deliveryInformationRepository.create({
-      ...createDeliveryInformationDto,
-      user: { id: userId },
-    });
+  async create(createDeliveryInformationDto: CreateDeliveryInformationDto) {
+    const result = await this.deliveryInformationRepository.create(
+      createDeliveryInformationDto,
+    );
     return await this.deliveryInformationRepository.save(result);
   }
 
