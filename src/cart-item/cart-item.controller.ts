@@ -58,6 +58,7 @@ export class CartItemController {
   ) {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
     const userEmail = req.user?.email;
+    const role = req.user.role;
     const user = await this.userRepository.findOne({
       where: { email: userEmail },
     });
@@ -67,6 +68,7 @@ export class CartItemController {
       paginationQueryDto,
       filters,
       userId,
+      role,
     );
     return {
       success: true,

@@ -59,12 +59,12 @@ export class CartItemService {
       },
     });
 
-    if (existingCartItem) {
-      existingCartItem.quantity += createCartItemDto.quantity;
-      existingCartItem.subtotal =
-        existingCartItem.quantity * Number(item.price);
-      return await this.cartItemRepository.save(existingCartItem);
-    }
+    // if (existingCartItem) {
+    //   existingCartItem.quantity += createCartItemDto.quantity;
+    //   existingCartItem.subtotal =
+    //     existingCartItem.quantity * Number(item.price);
+    //   return await this.cartItemRepository.save(existingCartItem);
+    // }
 
     const subtotal = createCartItemDto.quantity * Number(item.price);
 
@@ -83,6 +83,7 @@ export class CartItemService {
     paginationQueryDto: PaginationQueryDto,
     filters: any,
     userId: number | undefined,
+    role: string,
   ): Promise<{ data: CartItem[]; pagination: any; total: any }> {
     let { page, limit, allData, sortBy, order } = paginationQueryDto;
     page = Number(page) || 1;
@@ -102,19 +103,27 @@ export class CartItemService {
     if (!cart) {
       throw new NotFoundException(`Cart with ID  not found`);
     }
+    if (role === 'user') {
+      filters.cart = { id: cart.id };
+      filters.deleted = false;
+    }
 
-    filters.cart = { id: cart.id };
-    const cartItems = await this.cartItemRepository.find({
+    const cartItem = await this.cartItemRepository.find({
       where: {
         cart: {
           id: cart.id,
         },
       },
     });
+    const cartItems = cartItem.filter((i) => {
+      if (i.deleted === false) return i;
+    });
+
     const t = cartItems.reduce((acc, curr) => {
       return acc + curr.subtotal;
     }, 0);
     const total = Number(t + 5);
+
     const { data, pagination } = await paginate<CartItem>(
       this.cartItemRepository,
       ['item', 'cart'],
