@@ -7,6 +7,7 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from 'src/cart-item/entities/cart-item.entity';
@@ -69,7 +70,7 @@ export class StripeController {
 
     await this.orderService.create(req.user.userId, delivery);
 
-    const cartItems = await this.cartItemRepo.find({
+    const cartItem = await this.cartItemRepo.find({
       where: {
         cart: {
           id: cart?.id,
@@ -77,9 +78,20 @@ export class StripeController {
       },
       relations: ['item'],
     });
+    const cartItems = cartItem.filter((i) => {
+      if (i.deleted === false) return i;
+    });
+    await Promise.all(
+      cartItems.map(async (i) => {
+        i.deleted = true;
+        await this.cartItemRepo.save(i);
+      }),
+    );
 
     if (!cartItems || cartItems.length === 0) {
-      throw new Error('Cart is empty. Cannot create Stripe Checkout Session.');
+      throw new BadRequestException(
+        'Cart is empty. Cannot create Stripe Checkout Session.',
+      );
     }
 
     const session = await this.stripeService.createCheckoutSession(

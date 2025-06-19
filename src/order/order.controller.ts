@@ -56,10 +56,16 @@ export class OrderController {
     @Request() req,
   ) {
     const userId = req.user.userId;
+    const role = req.user.role;
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
 
     const { data, pagination, length, result, sumPrice } =
-      await this.orderService.findAll(paginationQueryDto, filters, userId);
+      await this.orderService.findAll(
+        paginationQueryDto,
+        filters,
+        userId,
+        role,
+      );
     return {
       message: 'Order fetched Successfully',
       data,

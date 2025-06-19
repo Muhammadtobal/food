@@ -3,7 +3,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from 'src/cart-item/entities/cart-item.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Order } from './entities/order.entity';
 import { PaginationQueryDto } from 'src/utils/paginateDto';
@@ -46,6 +46,7 @@ export class OrderService {
     paginationQueryDto: PaginationQueryDto,
     filters: any,
     userId: number | undefined,
+    role: string,
   ): Promise<{
     data: Order[];
     pagination: any;
@@ -72,6 +73,10 @@ export class OrderService {
     if (!cart) {
       throw new NotFoundException('Cart not found for this user');
     }
+    if (role === 'user') {
+      filters.cart = { id: cart.id };
+    }
+
     const getCartItem = await this.cartItemRepo.find({
       where: {
         cart: {
@@ -80,6 +85,7 @@ export class OrderService {
       },
       relations: ['item'],
     });
+
     const length = getCartItem.length;
     // console.log(length);
     const result = getCartItem.map((item) => ({

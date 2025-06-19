@@ -26,7 +26,8 @@ export class CartItem {
   quantity: number;
   @Column()
   subtotal: number;
-
+  @Column({ default: false })
+  deleted: boolean;
   @CreateDateColumn()
   createdAt: Date;
 
