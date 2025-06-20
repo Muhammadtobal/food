@@ -206,25 +206,34 @@ export class CartItemService {
     await this.cartItemRepository.delete(id);
   }
   async updateCartItemQuantity(
-    updateCartItemDto: UpdateCartItemDto,
+    itemId: number,
+    userId: number,
   ): Promise<CartItem | null> {
+    console.log(userId);
     const getOne = await this.cartItemRepository.findOne({
       where: {
-        item: {
-          id: updateCartItemDto?.itemId,
+        item: { id: itemId },
+        cart: {
+          user: {
+            id: userId,
+          },
         },
       },
-      relations: ['item', 'cart'],
+      relations: ['item', 'cart', 'cart.user'],
     });
+    // console.log(`user id is :${userId}`);
+    // console.log(`getOne is :${getOne}`);
     if (!getOne) {
-      throw new NotFoundException(`the Cart-Item Not Found with `);
+      throw new NotFoundException('Item not found in your cart');
     }
-    if (getOne.quantity > 0) {
-      getOne.quantity = Number(getOne.quantity - 1);
-      getOne.subtotal = Number(getOne.item.price) * getOne.quantity;
+
+    if (getOne.quantity > 1) {
+      getOne.quantity = getOne.quantity - 1;
+      getOne.subtotal = getOne.quantity * Number(getOne.item.price);
+      return await this.cartItemRepository.save(getOne);
     } else {
-      throw new BadRequestException('the Quantity has been 0');
+      await this.cartItemRepository.remove(getOne);
+      return null;
     }
-    return await this.cartItemRepository.save(getOne);
   }
 }

@@ -93,7 +93,7 @@ export class CartItemController {
 
   @Put(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.User)
+  @Roles(UserRole.ADMIN)
   async update(
     @Param('id') id: number,
     @Body() updateCartItemDto: UpdateCartItemDto,
@@ -123,9 +123,13 @@ export class CartItemController {
   async updateCartItemQuantity(
     @Param('id') id: number,
     @Body() updateCartItemDto: UpdateCartItemDto,
+    @Request() req,
   ) {
-    const result =
-      await this.cartItemService.updateCartItemQuantity(updateCartItemDto);
+    const userId = req.user?.userId;
+    const result = await this.cartItemService.updateCartItemQuantity(
+      id,
+      userId,
+    );
     return {
       message: 'Cart-Item updated successfully',
       success: true,
